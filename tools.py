@@ -57,26 +57,48 @@ def calculator(expression: str) -> str:
 
 
 def web_search(query: str) -> str:
-    try:
+    import time as _time
+
+    def _attempt():
         with DDGS() as ddgs:
-            results = ddgs.text(query, region="us-en", safesearch="off", max_results=5)
-        if not results:
-            return f"No results found for: {query}"
-        formatted = []
-        for i, item in enumerate(results[:5], 1):
-            title = item.get("title", "").strip()
-            if len(title) > 120:
-                title = title[:120] + "..."
-            snippet = item.get("body", "").strip()
-            if len(snippet) > 300:
-                snippet = snippet[:300] + "..."
-            url = item.get("href", "").strip()
-            formatted.append(f"{i}. {title}\n   Snippet: {snippet}\n   URL: {url}")
-        return "\n".join(formatted)
-    except Exception as e:
-        if "no results found" in str(e).lower():
-            return f"No results found for: {query}"
-        return f"Error: {e}"
+            return ddgs.text(query, region="us-en", safesearch="off", max_results=5)
+
+    results = None
+    last_err = None
+    for attempt in range(2):
+        try:
+            results = _attempt()
+            if results:
+                break
+            # no results on first try — wait and retry once
+            if attempt == 0:
+                _time.sleep(1)
+        except Exception as e:
+            if "no results found" in str(e).lower():
+                if attempt == 0:
+                    _time.sleep(1)
+                    continue
+                return f"No results found for: {query}"
+            last_err = e
+            if attempt == 0:
+                _time.sleep(1)
+
+    if last_err is not None and not results:
+        return f"Error: {last_err}"
+    if not results:
+        return f"No results found for: {query}"
+
+    formatted = []
+    for i, item in enumerate(results[:5], 1):
+        title = item.get("title", "").strip()
+        if len(title) > 120:
+            title = title[:120] + "..."
+        snippet = item.get("body", "").strip()
+        if len(snippet) > 300:
+            snippet = snippet[:300] + "..."
+        url = item.get("href", "").strip()
+        formatted.append(f"{i}. {title}\n   Snippet: {snippet}\n   URL: {url}")
+    return "\n".join(formatted)
 
 
 def python_repl(code: str) -> str:
@@ -105,19 +127,28 @@ def python_repl(code: str) -> str:
 @tool("calculator")
 def calculator_tool(expression: str) -> str:
     """Exact arithmetic on numbers. Use for any math calculation. The result is final and exact; do not verify it with another tool. Supports + - * / ** % // and parentheses. Input example: '123456789 * 987654321'."""
-    return calculator(expression)
+    try:
+        return calculator(expression)
+    except Exception as e:
+        return f"Error: {e}"
 
 
 @tool("web_search")
 def web_search_tool(query: str) -> str:
     """Search the web for current or real-time information (news, recent versions, prices, events, facts that may have changed). Do NOT use for general knowledge you already know. Input: a short search query."""
-    return web_search(query)
+    try:
+        return web_search(query)
+    except Exception as e:
+        return f"Error: {e}"
 
 
 @tool("python_repl")
 def python_repl_tool(code: str) -> str:
     """Execute Python code for tasks that need real code execution (loops, algorithms, data processing, text manipulation). Do NOT use for simple arithmetic; use calculator instead. Always use print() to show results."""
-    return python_repl(code)
+    try:
+        return python_repl(code)
+    except Exception as e:
+        return f"Error: {e}"
 
 
 ALL_TOOLS = [calculator_tool, web_search_tool, python_repl_tool]

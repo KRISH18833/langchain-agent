@@ -37,7 +37,21 @@ langchain-agent/
 
 ## Running the Agent
 
+Run with default prompt:
 ```bash
 python main.py
 ```
+
+Run with custom query:
+```bash
+python main.py "Search for the latest Python version"
+```
+
+## Running Tests
+
+Run the automated test suite across single-tool, multi-step, and tool-failure scenarios:
+```bash
+python run_tests.py
+```
+Output is saved to `test_output.txt`.
 

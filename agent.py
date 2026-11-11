@@ -18,7 +18,8 @@ SYSTEM_PROMPT = (
     "Trust a tool result that does not start with 'Error:'. Never re-run or re-verify a successful "
     "result with another tool; give the final answer immediately. If a tool returns an error, "
     "explain it briefly and try a different approach or give your best answer. "
-    "Before each tool call, briefly state why you are using it."
+    "Before each tool call, briefly state why you are using it. "
+    "If a tool fails, do not use python_repl as a workaround to do the same job. Report the failure and give your best answer."
 )
 
 
@@ -46,11 +47,20 @@ def build_agent():
     return agent
 
 
-def _force_final_answer(llm, messages: list) -> str:
+def _force_final_answer(llm, messages: list, last_success: str | None = None) -> str:
     """Call the LLM once with no tools, asking it to give a final answer."""
-    prompt_msgs = messages + [
-        HumanMessage(content="Give your final answer now using the tool results above.")
-    ]
+    if last_success is not None:
+        prompt_text = (
+            f"Give your final answer now. The latest successful tool result is: {last_success}. "
+            "Use these exact digits. Do not recompute anything."
+        )
+    else:
+        prompt_text = (
+            "The tools failed. Give your best final answer from your own knowledge now. "
+            "Say clearly that the tool failed and that the answer may be out of date. Do not call any tools."
+        )
+
+    prompt_msgs = messages + [HumanMessage(content=prompt_text)]
     response = llm.invoke(prompt_msgs)
     return _extract_text(response.content).strip()
 
@@ -66,7 +76,12 @@ def run_agent(question: str) -> str:
 
         # Loop guard state
         seen_calls: set[tuple] = set()          # (tool_name, frozen_args)
+        tool_call_counts: dict[str, int] = {}   # tool_name -> total invocations
+        error_streaks: dict[str, int] = {}      # tool_name -> consecutive "Error:" count
+        total_tool_calls: int = 0               # total tool calls initiated in run
         calculator_success: str | None = None   # stores result if calculator succeeded
+        last_success: str | None = None         # stores latest successful (non-"Error:") tool result
+        MAX_CALLS_PER_TOOL = 3                  # hard ceiling per tool name
 
         stream = agent.stream(
             {"messages": [{"role": "user", "content": question}]},
@@ -105,21 +120,44 @@ def run_agent(question: str) -> str:
 
                             call_key = (name, frozen)
 
+                            # Guard: Total calls reaches 5, trigger on next request
+                            if total_tool_calls >= 5:
+                                print("[LOOP GUARD] Too many tool calls, stopping and forcing final answer")
+                                answer = _force_final_answer(llm, all_messages, last_success)
+                                print(f"[FINAL ANSWER] {answer}")
+                                return answer
+
                             # Guard 1: exact duplicate call
                             if call_key in seen_calls:
                                 print(f"[LOOP GUARD] Repeated call to {name}, stopping and forcing final answer")
-                                answer = _force_final_answer(llm, all_messages)
+                                answer = _force_final_answer(llm, all_messages, last_success)
                                 print(f"[FINAL ANSWER] {answer}")
                                 return answer
 
                             # Guard 2: python_repl after a successful calculator result
                             if name == "python_repl" and calculator_success is not None:
                                 print(f"[LOOP GUARD] Repeated call to {name}, stopping and forcing final answer")
-                                answer = _force_final_answer(llm, all_messages)
+                                answer = _force_final_answer(llm, all_messages, last_success)
+                                print(f"[FINAL ANSWER] {answer}")
+                                return answer
+
+                            # Guard 3: same tool called too many times (different args each time)
+                            tool_call_counts[name] = tool_call_counts.get(name, 0) + 1
+                            if tool_call_counts[name] > MAX_CALLS_PER_TOOL:
+                                print(f"[LOOP GUARD] {name} called >{MAX_CALLS_PER_TOOL} times, stopping and forcing final answer")
+                                answer = _force_final_answer(llm, all_messages, last_success)
+                                print(f"[FINAL ANSWER] {answer}")
+                                return answer
+
+                            # Guard 4: error streak check (if tool already failed twice consecutively)
+                            if error_streaks.get(name, 0) >= 2:
+                                print(f"[LOOP GUARD] {name} failed twice, stopping and forcing final answer")
+                                answer = _force_final_answer(llm, all_messages, last_success)
                                 print(f"[FINAL ANSWER] {answer}")
                                 return answer
 
                             seen_calls.add(call_key)
+                            total_tool_calls += 1
                             print(f"[TOOL CALL] {name}({args_str})")
                     else:
                         print(f"[FINAL ANSWER] {text}")
@@ -132,9 +170,19 @@ def run_agent(question: str) -> str:
                         content = content[:500] + "..."
                     print(f"[TOOL RESULT] {tool_name} -> {content}")
 
-                    # Record a successful calculator result
-                    if tool_name == "calculator" and not content.startswith("Error:"):
-                        calculator_success = content
+                    # Record error streaks or successful tool results
+                    if content.startswith("Error:"):
+                        error_streaks[tool_name] = error_streaks.get(tool_name, 0) + 1
+                        if error_streaks[tool_name] >= 2:
+                            print(f"[LOOP GUARD] {tool_name} failed twice, stopping and forcing final answer")
+                            answer = _force_final_answer(llm, all_messages, last_success)
+                            print(f"[FINAL ANSWER] {answer}")
+                            return answer
+                    else:
+                        error_streaks[tool_name] = 0
+                        last_success = content
+                        if tool_name == "calculator":
+                            calculator_success = content
 
             printed_count = len(messages)
 

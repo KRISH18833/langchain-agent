@@ -1,0 +1,70 @@
+=== TEST 1: Single tool (calculator) ===
+[USER] What is 2 ** 100 + 987654321 * 123456789?
+D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
+  request = self._build_request_config(
+[TOOL CALL] calculator(expression='2 ** 100 + 987654321 * 123456789')
+[TOOL RESULT] calculator -> 1267650600228351334127815840645
+D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
+  request = self._build_request_config(
+[LOOP GUARD] Repeated call to python_repl, stopping and forcing final answer
+D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
+  request = self._build_request_config(
+[FINAL ANSWER] The exact value is:
+
+1267650600228351334127815840645
+
+[sleeping 5s to avoid rate limits]
+
+=== TEST 2: Multi-step (search + calculate) ===
+[USER] Search for the current population of India, then calculate how many people that is per square kilometer given India's area is 3,287,263 km2.
+D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
+  request = self._build_request_config(
+[TOOL CALL] web_search(query='current population of India 2026 or 2025')
+[TOOL RESULT] web_search -> 1. India Population (2026) - Worldometer
+   Snippet: Population of India: current, historical, and projected population, growth rate, immigration, median age, total fertility rate (TFR), population density, urbanization ...
+   URL: https://www.worldometers.info/world-population/india-population/
+2. India Population 2026 (Live) | State & District Wise Demographics
+   Snippet: 15 hours ago · Current Population of India 2026 estimates and official Census 2011 data. View state-wise population, demog...
+D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
+  request = self._build_request_config(
+[TOOL CALL] calculator(expression='1467231210 / 3287263')
+[TOOL RESULT] calculator -> 446.3382485672731
+D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
+  request = self._build_request_config(
+[FINAL ANSWER] According to current estimates, India's population is approximately **1,467,231,210**. 
+
+Given India's area of 3,287,263 km², this results in a population density of approximately **446 people per square kilometer**.
+
+[sleeping 5s to avoid rate limits]
+
+=== TEST 3: Tool failure (calculator) ===
+[USER] Use the calculator tool to compute 100 / 0 and report what it returns.
+D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
+  request = self._build_request_config(
+[TOOL CALL] calculator(expression='100 / 0')
+[TOOL RESULT] calculator -> Error: Division by zero
+D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
+  request = self._build_request_config(
+[FINAL ANSWER] The calculator tool returned an error when attempting to divide by zero: "Error: Division by zero".
+
+[sleeping 5s to avoid rate limits]
+
+=== TEST 4: Tool failure (search) ===
+[USER] What is the latest Python release?
+D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
+  request = self._build_request_config(
+[TOOL CALL] web_search(query='latest python release version')
+[TOOL RESULT] web_search -> Error: network down
+D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
+  request = self._build_request_config(
+[TOOL CALL] web_search(query='python current version release')
+[TOOL RESULT] web_search -> Error: network down
+[LOOP GUARD] web_search failed twice, stopping and forcing final answer
+D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
+  request = self._build_request_config(
+[FINAL ANSWER] *(Note: The web search tool failed to connect, so this answer is based on my internal knowledge cutoff and may be out of date.)*
+
+As of my last knowledge update, the latest stable Python releases are in the **Python 3.12** series (with Python 3.12.x being the primary stable branch, and Python 3.13 moving into pre-release or newer status). 
+
+To check the absolute newest release right now, I recommend visiting the official [Python Downloads page](https://www.python.org/downloads/).
+
