@@ -1,17 +1,30 @@
+=== TEST 0: No tool needed ===
+[USER] What is the capital of France?
+D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
+  request = self._build_request_config(
+[FINAL ANSWER] The capital of France is Paris.
+
+[sleeping 5s to avoid rate limits]
+
 === TEST 1: Single tool (calculator) ===
 [USER] What is 2 ** 100 + 987654321 * 123456789?
 D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
   request = self._build_request_config(
-[TOOL CALL] calculator(expression='2 ** 100 + 987654321 * 123456789')
+[TOOL CALL] calculator(expression='2**100 + 987654321 * 123456789')
 [TOOL RESULT] calculator -> 1267650600228351334127815840645
 D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
   request = self._build_request_config(
 [LOOP GUARD] Repeated call to python_repl, stopping and forcing final answer
 D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
   request = self._build_request_config(
-[FINAL ANSWER] The exact value is:
+[FINAL ANSWER] To find the exact value of $2^{100} + 987654321 \times 123456789$, we compute both parts:
 
-1267650600228351334127815840645
+1. $2^{100} = 1,267,650,600,228,229,401,496,703,205,376$
+2. $987,654,321 \times 123456789 = 121,932,631,112,635,269$
+
+Adding them together gives the exact integer:
+
+**1267650600228351334127815840645**
 
 [sleeping 5s to avoid rate limits]
 
@@ -24,16 +37,26 @@ D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_gen
    Snippet: Population of India: current, historical, and projected population, growth rate, immigration, median age, total fertility rate (TFR), population density, urbanization ...
    URL: https://www.worldometers.info/world-population/india-population/
 2. India Population 2026 (Live) | State & District Wise Demographics
-   Snippet: 15 hours ago · Current Population of India 2026 estimates and official Census 2011 data. View state-wise population, demog...
+   Snippet: 16 hours ago · Current Population of India 2026 estimates and official Census 2011 data. View state-wise population, demographics, literacy rates, and sex ratio statistics.
+   URL: http://indiacensus.in/
+3. India Population 2026
+   Snippet: Details and statistics about India, a country in Asia known for the Taj Mahal and diverse cultural heritage.
+   URL: https://worldpopulationreview.com/countries/india
+4. India Population In November 2026: 1.47 Billion (36 States ...
+   Snippet: 16 hours ago · India's population stands at 1.47 billion in 2026, making it the world's most populous country. Track live counts across 36 states & UT's, fertility, and sex ratio.
+   URL: https://worldpopulationclock.net/india-live-population-clock-by-state/
+5. India Population (1950-2026) - Macrotrends
+   Snippet: Total current population for India in 2026 is 1,467,231,210, a 0.87% increase from 2025. Total population for India in 2025 was 1,454,606,724, a 0.89% increase from 2024.
+   URL: https://www.macrotrends.net/global-metrics/countries/ind/india/population
 D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
   request = self._build_request_config(
 [TOOL CALL] calculator(expression='1467231210 / 3287263')
 [TOOL RESULT] calculator -> 446.3382485672731
 D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
   request = self._build_request_config(
-[FINAL ANSWER] According to current estimates, India's population is approximately **1,467,231,210**. 
+[FINAL ANSWER] According to current estimates, India's population is approximately **1,467,231,210** (about 1.47 billion). 
 
-Given India's area of 3,287,263 km², this results in a population density of approximately **446 people per square kilometer**.
+Given India's area of 3,287,263 km², the population density is approximately **446 people per square kilometer**.
 
 [sleeping 5s to avoid rate limits]
 
@@ -53,18 +76,18 @@ D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_gen
 [USER] What is the latest Python release?
 D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
   request = self._build_request_config(
-[TOOL CALL] web_search(query='latest python release version')
+[TOOL CALL] web_search(query='latest Python release version python.org')
 [TOOL RESULT] web_search -> Error: network down
 D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
   request = self._build_request_config(
-[TOOL CALL] web_search(query='python current version release')
+[TOOL CALL] web_search(query='latest python release version')
 [TOOL RESULT] web_search -> Error: network down
 [LOOP GUARD] web_search failed twice, stopping and forcing final answer
 D:\Valentius Kryptix\langchain-agent\venv\Lib\site-packages\langchain_google_genai\chat_models.py:3935: UserWarning: Model 'gemini-3.5-flash-lite' uses fixed sampling defaults; the sampling parameter(s) temperature will be ignored.
   request = self._build_request_config(
-[FINAL ANSWER] *(Note: The web search tool failed to connect, so this answer is based on my internal knowledge cutoff and may be out of date.)*
+[FINAL ANSWER] The tool failed to retrieve live data, so my answer is based on my knowledge cutoff of January 2025 and may be out of date. 
 
-As of my last knowledge update, the latest stable Python releases are in the **Python 3.12** series (with Python 3.12.x being the primary stable branch, and Python 3.13 moving into pre-release or newer status). 
+As of my last update, the latest stable Python releases were in the **Python 3.13** series (such as Python 3.13.0, which was released in October 2024), with Python 3.14 currently in development. 
 
-To check the absolute newest release right now, I recommend visiting the official [Python Downloads page](https://www.python.org/downloads/).
+To check for the absolute newest release, please visit the official [Python Downloads page](https://www.python.org/downloads/).
 

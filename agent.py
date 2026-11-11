@@ -166,8 +166,8 @@ def run_agent(question: str) -> str:
                 elif isinstance(msg, ToolMessage):
                     tool_name = getattr(msg, "name", None) or "tool"
                     content = _extract_text(msg.content).strip()
-                    if len(content) > 500:
-                        content = content[:500] + "..."
+                    if len(content) > 1500:
+                        content = content[:1500] + "..."
                     print(f"[TOOL RESULT] {tool_name} -> {content}")
 
                     # Record error streaks or successful tool results

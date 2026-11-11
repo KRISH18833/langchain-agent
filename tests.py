@@ -5,6 +5,11 @@ from agent import run_agent
 
 TESTS = [
     (
+        "No tool needed",
+        "What is the capital of France?",
+        None,
+    ),
+    (
         "Single tool (calculator)",
         "What is 2 ** 100 + 987654321 * 123456789?",
         None,
@@ -34,7 +39,7 @@ def _network_down(query: str) -> str:
     raise RuntimeError("network down")
 
 
-for n, (label, question, patch) in enumerate(TESTS, 1):
+for n, (label, question, patch) in enumerate(TESTS):
     print(f"=== TEST {n}: {label} ===")
 
     if patch == "network_down":
@@ -52,7 +57,7 @@ for n, (label, question, patch) in enumerate(TESTS, 1):
 
     print()
 
-    if n < len(TESTS):
+    if n < len(TESTS) - 1:
         print("[sleeping 5s to avoid rate limits]")
         time.sleep(5)
         print()
