@@ -1,5 +1,5 @@
 langchain
 langchain-google-genai
 langchain-community
-duckduckgo-search
+ddgs
 python-dotenv
